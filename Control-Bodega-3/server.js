@@ -7,12 +7,11 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos (tu HTML, CSS, JS del frente)
+// Servir archivos estáticos (tu HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- CONEXIÓN A MONGODB ---
-// Reemplaza mruizg_db_password por tu contraseña real si es distinta
-const mongoURI = 'mongodb://mruizg_db_user:mruizg_db_password@cluster0-shard-00-00.v8cdw8u.mongodb.net:27017,cluster0-shard-00-01.v8cdw8u.mongodb.net:27017,cluster0-shard-00-02.v8cdw8u.mongodb.net:27017/controlBodega?ssl=true&replicaSet=atlas-shard-0&authSource=admin&retryWrites=true&w=majority';
+// --- CONEXIÓN A MONGODB (CORREGIDA) ---
+const mongoURI = 'mongodb://mruizg_db_user:Bodega2024*@cluster0-shard-00-00.v8cdw8u.mongodb.net:27017,cluster0-shard-00-01.v8cdw8u.mongodb.net:27017,cluster0-shard-00-02.v8cdw8u.mongodb.net:27017/controlBodega?ssl=true&replicaSet=atlas-shard-0&authSource=admin&retryWrites=true&w=majority';
 
 mongoose.connect(mongoURI)
   .then(() => console.log("✅ Conexión exitosa a MongoDB Atlas"))
@@ -35,14 +34,18 @@ app.post('/api/guardar', async (req, res) => {
         await nuevoRegistro.save();
         res.status(200).send("✅ Registro guardado con éxito");
     } catch (error) {
-        res.status(500).send("❌ Error al guardar");
+        res.status(500).send("❌ Error al guardar en la base de datos");
     }
 });
 
-// 2. Ruta para ver los registros (opcional)
+// 2. Ruta para obtener registros
 app.get('/api/registros', async (req, res) => {
-    const registros = await Registro.find().sort({ fecha: -1 });
-    res.json(registros);
+    try {
+        const registros = await Registro.find().sort({ fecha: -1 });
+        res.json(registros);
+    } catch (error) {
+        res.status(500).json({ error: "No se pudieron obtener los registros" });
+    }
 });
 
 // --- INICIO DEL SERVIDOR ---
